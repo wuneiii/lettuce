@@ -1,0 +1,13 @@
+$def with (data_client)
+
+<table>
+	<tr>
+		<td>客户端名称</td>
+		<td>最后注册时间</td>
+	</tr>
+$for client in data_client:
+	<tr>
+		<td>$client['name']</td>
+		<td>$client['reg_time']</td>
+	</tr>
+</table>

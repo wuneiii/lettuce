@@ -1,0 +1,34 @@
+import socket
+import select
+from util import log
+from lettuce import netMessage
+from lettuce import sockManager
+
+class Server(object):
+	def __init__(self, config):
+		self.config = config
+		self.serverAddr = (config['server_ip'], int(config['server_port']))
+		self.socket = None
+	def startServer(self):
+		sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM)
+		sock.setblocking(False)
+		sock.bind(self.serverAddr)
+		sock.listen(1)
+		sockManager.addToList('rList' , sock)
+		sockManager.addToList('eList' , sock)
+		
+		while True:
+			rs,ws,es = select.select(sockManager.rList , sockManager.wList, sockManager.eList)
+			for s in rs:
+				if s is sock:
+					conn,addr = s.accept()
+					log.getLogger().info('connect by ' + str(addr))
+					conn.setblocking(False)
+					sockManager.addToList('rList',conn)
+				else:
+					netMessage.readNbSock(s)
+			for s in es:
+				print 'except',s.getpeername()
+				sockManager.removeFromAllList(s)
+				s.close();
+	
